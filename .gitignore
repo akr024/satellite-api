@@ -1,0 +1,28 @@
+# Byte-code files
+__pycache__
+*.pyc
+
+# Virtual environment
+venv/
+env/
+.venv/
+.env/
+
+# IDE specific files and directories
+.idea/  # For PyCharm
+.vscode/ # For VS Code
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+wheels/
+
+# Log and data files
+*.log
+*.sqlite3 # Example for Django databases
+data/ # If data is generated and not source controlled
+
+# OS specific files
+.DS_Store # macOS
+Thumbs.db # Windows
