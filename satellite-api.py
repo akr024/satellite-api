@@ -63,8 +63,16 @@ async def get_satellite_tle(norad_id):
 # meaning that we have to store all the old TLEs
 # per norad, maintain a dictionary of -> norad: [TLEs]
 @app.get("/satellite_tle/{norad_id}/history")
-def get_all_tles():
-    return None
+def get_all_tles(norad_id):
+    if norad_id not in cache:
+        raise HTTPException(status_code=404, detail="No data found")
+
+    tleHistory = []
+
+    for tle in cache[norad_id]:
+        tleHistory.append(tle)
+
+    return tleHistory
 
 # to add a custom tle for a satellite
 # since we cannot access the public tle data due to restrictions
