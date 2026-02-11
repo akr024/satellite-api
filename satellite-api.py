@@ -35,7 +35,7 @@ def get_satellite_tle():
 # to fetch all of a satellite's TLEs
 # meaning that we have to store all the old TLEs
 # per norad, maintain a dictionary of -> norad: [TLEs]
-@app.get("/satellite_tle/{norad_id}")
+@app.get("/satellite_tle/{norad_id}/history")
 def get_all_tles():
     return None
 
