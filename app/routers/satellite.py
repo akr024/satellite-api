@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from app.services.cache import cache
 import asyncio
-import datetime
+from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException, APIRouter
 import httpx
 
@@ -20,7 +20,7 @@ def epoch_parser(line1: str) -> datetime.datetime:
     year = int(line1[18:20])
     year = 2000 + year if year < 57 else 1900 + year
     day = float(line1[20:32])
-    epoch = datetime.datetime(year, 1, 1, tzinfo=datetime.timezone.utc) + datetime.timedelta(days=day - 1)
+    epoch = datetime(year, 1, 1, tzinfo=timezone.utc) + timedelta(days=day - 1)
     return epoch
 
 # function to fetch the latest data of a satellite
@@ -44,7 +44,7 @@ async def get_satellite_tle(norad_id: str):
             cache[norad_id] = []
         else:
             latest_tle = cache[norad_id][0] #the first index stores the latest epoch TLE
-            if (datetime.now(datetime.timezone.utc) - latest_tle['fetch_time']) > datetime.timedelta(hours=1):
+            if (datetime.now(timezone.utc) - latest_tle['fetch_time']) > timedelta(hours=1):
                 fetch_from_cache = True
         
         if fetch_from_cache:
@@ -54,7 +54,7 @@ async def get_satellite_tle(norad_id: str):
                 "line1": line1,
                 "line2": line2,
                 "epoch": epoch,
-                "fetch_time": datetime.now(datetime.timezone.utc),
+                "fetch_time": datetime.now(timezone.utc),
                 "source": "celestrak"
             })
 
@@ -98,7 +98,7 @@ async def add_custom_tle(norad_id: str, new_tle: TLEInput):
             'line1': new_tle.line1,
             'line2': new_tle.line2,
             'epoch': epoch,
-            'fetch_time': datetime.now(datetime.timezone.utc),
+            'fetch_time': datetime.now(timezone.utc),
             'source': 'client'
         })
 
