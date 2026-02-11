@@ -78,5 +78,23 @@ def get_all_tles(norad_id):
 # since we cannot access the public tle data due to restrictions
 # this custom tle will go in our local storage of all tles
 @app.post("/satellite_tle/{norad_id}")
-def add_custom_tle():
-    return None
+def add_custom_tle(norad_id, new_tle):
+    epoch = epoch_parser(new_tle.line1) #since new_tle is just an object with line1
+    # alternatively, if it's a dictionary of string: string mapping
+    # I could use epoch_parser(new_tle["line1"])
+    if norad_id not in cache:
+        cache[norad_id] = []
+    
+    cache[norad_id].insert(0, {
+        'line1': new_tle.line1,
+        'line2': new_tle.line2,
+        'epoch': epoch,
+        'fetch_time': datetime.now(datetime.timezone.utc),
+        'source': 'client'
+    })
+
+    cache.sort(key=lambda x: x["epoch"], reverse=True) # because this new insertion/update might be of an old TLE
+    
+    return {
+        "status": "success"
+    }
