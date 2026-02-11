@@ -16,16 +16,15 @@ def epoch_parser(raw_response):
     epoch = datetime(year, 1, 1, tzinfo=datetime.timezone.utc) + datetime.timedelta(days=day - 1)
     return str(epoch)
 
-@app.get("/")
-def fetch_from_celestrak():
-    response = requests.get("https://celestrak.org/NORAD/elements/gp.php?CATNR=54234&FORMAT=2LE")
-    resContent = response.text.strip().splitlines()
-    resObj = {
-        "line1": resContent[0],
-        "line2": resContent[1],
-        "epoch": "j"
-    }
-    return resObj
+# function to fetch the latest data of a satellite
+async def fetch_from_celestrak(norad_id):
+    url = f"https://celestrak.org/NORAD/elements/gp.php?CATNR={norad_id}&FORMAT=2LE"
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
+        if response.status_code != 200:
+            raise HTTPException(status_code=404, detail="Satellite data not found!")
+        lines = response.text.strip().split('\n')
+        return lines[0], lines[1]
 
 # to fetch a satellite's latest TLE
 @app.get("/satellite_tle/{norad_id}")
