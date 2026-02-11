@@ -33,6 +33,7 @@ async def get_satellite_tle(norad_id):
 
     if norad_id not in cache: #meaning that the norad id is not present in the cache as a key
         fetch_from_cache = True
+        cache[norad_id] = []
     else:
         latest_tle = cache[norad_id][0] #the first index stores the latest epoch TLE
         if (datetime.now(datetime.timezone.utc) - latest_tle['fetch_time']) > datetime.timedelta(hours=1):
@@ -41,6 +42,22 @@ async def get_satellite_tle(norad_id):
     if fetch_from_cache:
         line1, line2 = await fetch_from_celestrak(norad_id)
         epoch = epoch_parser(line1)
+        cache[norad_id].insert(0, {
+            "line1": line1,
+            "line2": line2,
+            "epoch": epoch,
+            "fetch_time": datetime.now(datetime.timezone.utc),
+            "source": "celestrak"
+        })
+
+    latest = cache[norad_id][0]
+    return {
+        'line1': latest["line1"],
+        'line2': latest["line2"],
+        'epoch': latest["epoch"],
+        'fetch_time': latest["fetch_time"].isoformat(),
+        'source': latest['source']
+    }
 
 # to fetch all of a satellite's TLEs
 # meaning that we have to store all the old TLEs
